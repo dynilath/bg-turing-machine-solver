@@ -122,7 +122,7 @@ def is_smallest(target: Color, v: InputType):
 
 
 def is_only_smallest(target: Color, v: InputType):
-    return is_smallest(target.value, v) and len([x for x in v if x == min(v)]) == 1
+    return is_smallest(target, v) and len([x for x in v if x == min(v)]) == 1
 
 
 # 14. blue is only smallest | yellow is only smallest | purple is only smallest
