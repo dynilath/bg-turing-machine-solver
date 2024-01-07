@@ -53,7 +53,7 @@ class CriteriaEntropy:
 
     def cal_entropy_for_input(self, value: InputType):
         picks = [x for x in combinations(range(len(self.groups)), 1)] + [x for x in combinations(
-            range(len(self.groups)), 2)] + [x for x in combinations(range(len(self.groups)), 3)]
+            range(len(self.groups)), 2)]
 
         result: typing.List[typing.Tuple[float,
                                          typing.List[int], typing.Tuple[int, int, int]]] = []
