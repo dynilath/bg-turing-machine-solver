@@ -24,6 +24,21 @@ class GameState:
                 filtered.append(v)
         self.possible_codes = filtered
 
+    def remove_multisolve_combinations(self):
+        filtered = []
+        # for a valid combination, one and only one code may satisfy it
+        for comb in self.possible_criteria_combination:
+            cris = [self.activated_groups[i][comb[i]]
+                    for i in range(len(comb))]
+            goodcomb = 0
+            for code in product(range(1, 6), range(1, 6), range(1, 6)):
+                result = [cri(code) for cri in cris]
+                if all(result):
+                    goodcomb += 1
+            if goodcomb == 1:
+                filtered.append(comb)
+        self.possible_criteria_combination = filtered
+
     def remove_impossible_criteria_combinations(self):
         filtered = []
         for comb in self.possible_criteria_combination:
@@ -55,6 +70,7 @@ class GameState:
         self.possible_criteria_combination: typing.List[typing.Tuple[int, ...]] = [
             i for i in product(*[
                 list(range(i)) for i in [len(criteria[i]) for i in self.activated_group_idx]])]
+        self.remove_multisolve_combinations()
         self.purge()
 
     def print(self):
