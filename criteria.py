@@ -169,7 +169,7 @@ criteria.append([Criterion("repeats 3 times", lambda v: len(set(v)) == 1),
                            lambda v: len(set(v)) == 2),
                  Criterion("no repeats", lambda v: len(set(v)) == 3)])
 # 21. no pairs | 1 pair
-criteria.append([Criterion("no pairs", lambda v: len(set(v)) == 3),
+criteria.append([Criterion("no pairs", lambda v: len(set(v)) == 3 or len(set(v)) == 1),
                  Criterion("1 pair", lambda v: len(set(v)) == 2)])
 
 
