@@ -37,6 +37,61 @@ class GameState:
                     goodcomb += 1
             if goodcomb == 1:
                 filtered.append(comb)
+
+        self.possible_criteria_combination = filtered
+
+    def print_possibles(self):
+        for i in self.possible_criteria_combination:
+            for code in product(range(1, 6), range(1, 6), range(1, 6)):
+                result = [self.activated_groups[j][i[j]](code)
+                          for j in range(len(i))]
+                if all(result):
+                    print(f"Code {code} satisfies {i}")
+
+    def remove_no_solve_combinations(self):
+        filtered = []
+        for comb in self.possible_criteria_combination:
+            for code in product(range(1, 6), range(1, 6), range(1, 6)):
+                result = [self.activated_groups[j][comb[j]](code)
+                          for j in range(len(comb))]
+                if all(result):
+                    filtered.append(comb)
+
+        self.possible_criteria_combination = filtered
+
+    def remove_locked_combinations(self):
+        # as combination index, -1 for concerned index
+        KeyType = typing.Tuple[int, ...]
+        ValueType = typing.Set[int]
+
+        filterSet = set()
+        # for a given part on criteria, no other criteria part is locked
+        xfiltermap: typing.Dict[KeyType, ValueType] = {}
+        for comb in self.possible_criteria_combination:
+            for i in range(len(comb)):
+                cp_comb = tuple(
+                    [comb[j] if j != i else -1 for j in range(len(comb))])
+                xfiltermap.setdefault(cp_comb, set())
+                xfiltermap[cp_comb].add(comb[i])
+        for k, v in xfiltermap.items():
+            if len(v) == 1:
+                filterSet.add(k)
+
+        for f in filterSet:
+            print(f"Combination {f} is locked")
+
+        filtered = []
+        for comb in self.possible_criteria_combination:
+            goodcomb = True
+            for i in range(len(comb)):
+                cp_comb = tuple(
+                    [comb[j] if j != i else -1 for j in range(len(comb))])
+                if cp_comb in filterSet:
+                    goodcomb = False
+                    break
+            if goodcomb:
+                filtered.append(comb)
+
         self.possible_criteria_combination = filtered
 
     def remove_impossible_criteria_combinations(self):
@@ -52,6 +107,7 @@ class GameState:
                     break
             if goodcomb:
                 filtered.append(comb)
+
         self.possible_criteria_combination = filtered
 
     def purge(self):
@@ -70,8 +126,18 @@ class GameState:
         self.possible_criteria_combination: typing.List[typing.Tuple[int, ...]] = [
             i for i in product(*[
                 list(range(i)) for i in [len(criteria[i]) for i in self.activated_group_idx]])]
+        # Stage 1: remove impossible criteria combinations
+        self.remove_no_solve_combinations()
+        # Stage 2: remove criteria combinations that have redundant
+        self.remove_locked_combinations()
+        # print("Stage 2:")
+        # self.print_possibles()
+        # Stage 3: remove criteria combinations that have multiple solutions
         self.remove_multisolve_combinations()
+
+        print("Stage Finished:")
         self.purge()
+        self.print_possibles()
 
     def print(self):
         GREY = '\033[90m'
