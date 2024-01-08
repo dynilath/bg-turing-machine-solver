@@ -130,14 +130,10 @@ class GameState:
         self.remove_no_solve_combinations()
         # Stage 2: remove criteria combinations that have redundant
         self.remove_locked_combinations()
-        # print("Stage 2:")
-        # self.print_possibles()
         # Stage 3: remove criteria combinations that have multiple solutions
         self.remove_multisolve_combinations()
 
-        print("Stage Finished:")
         self.purge()
-        self.print_possibles()
 
     def print(self):
         GREY = '\033[90m'
