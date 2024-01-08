@@ -117,34 +117,34 @@ criteria.append(compare_two_func_list(Color.YELLOW, Color.PURPLE, [
     "yellow < purple", "yellow == purple", "yellow > purple"]))
 
 
-def is_smallest(target: Color, v: InputType):
+def is_one_of_smallest(target: Color, v: InputType):
     return v[target.value] == min(v)
 
 
-def is_only_smallest(target: Color, v: InputType):
-    return is_smallest(target, v) and len([x for x in v if x == min(v)]) == 1
+def is_smallest(target: Color, v: InputType):
+    return is_one_of_smallest(target, v) and len([x for x in v if x == min(v)]) == 1
 
 
-# 14. blue is only smallest | yellow is only smallest | purple is only smallest
-criteria.append([Criterion("blue is only smallest", lambda v: is_only_smallest(Color.BLUE, v)),
-                 Criterion("yellow is only smallest",
-                           lambda v: is_only_smallest(Color.YELLOW, v)),
-                 Criterion("purple is only smallest", lambda v: is_only_smallest(Color.PURPLE, v))])
+# 14. blue is smallest | yellow is smallest | purple is smallest
+criteria.append([Criterion("blue is smallest", lambda v: is_smallest(Color.BLUE, v)),
+                 Criterion("yellow is smallest",
+                           lambda v: is_smallest(Color.YELLOW, v)),
+                 Criterion("purple is smallest", lambda v: is_smallest(Color.PURPLE, v))])
 
 
-def is_largest(target: Color, v: InputType):
+def is_one_of_largest(target: Color, v: InputType):
     return v[target.value] == max(v)
 
 
-def is_only_largest(target: Color, v: InputType):
-    return is_largest(target.value, v) and len([x for x in v if x == max(v)]) == 1
+def is_largest(target: Color, v: InputType):
+    return is_one_of_largest(target, v) and len([x for x in v if x == max(v)]) == 1
 
 
-# 15. blue is only largest | yellow is only largest | purple is only largest
-criteria.append([Criterion("blue is only largest", lambda v: is_only_largest(Color.BLUE, v)),
-                 Criterion("yellow is only largest",
-                           lambda v: is_only_largest(Color.YELLOW, v)),
-                 Criterion("purple is only largest", lambda v: is_only_largest(Color.PURPLE, v))])
+# 15. blue is largest | yellow is largest | purple is largest
+criteria.append([Criterion("blue is largest", lambda v: is_largest(Color.BLUE, v)),
+                 Criterion("yellow is largest",
+                           lambda v: is_largest(Color.YELLOW, v)),
+                 Criterion("purple is largest", lambda v: is_largest(Color.PURPLE, v))])
 
 # 16. even > odd | event < odd
 criteria.append([Criterion("even > odd", lambda v: count_even(v) > 1),
@@ -182,11 +182,11 @@ def in_full_descend(v: InputType):
 
 
 def in_part_ascend(v: InputType):
-    return gBLUE(v) < gYELLOW(v) or gYELLOW(v) < gPURPLE(v)
+    return not in_full_ascend(v) and (gBLUE(v) < gYELLOW(v) or gYELLOW(v) < gPURPLE(v))
 
 
 def in_part_descend(v: InputType):
-    return gBLUE(v) > gYELLOW(v) or gYELLOW(v) > gPURPLE(v)
+    return not in_full_descend(v) and (gBLUE(v) > gYELLOW(v) or gYELLOW(v) > gPURPLE(v))
 
 
 # 22. ascending | descending | no order
@@ -197,15 +197,34 @@ criteria.append([Criterion("ascending", lambda v: in_full_ascend(v)),
 criteria.append([Criterion("sum < 6", lambda v: sum(v) < 6),
                  Criterion("sum == 6", lambda v: sum(v) == 6),
                  Criterion("sum > 6", lambda v: sum(v) > 6)])
-# 24. 3 ascending | 2 ascending | no ascending
-criteria.append([Criterion("3 ascending", lambda v: in_full_ascend(v)),
-                 Criterion("2 ascending", lambda v: in_part_ascend(v)),
-                 Criterion("no ascending", lambda v: not (in_full_ascend(v) or in_part_ascend(v)))])
-# 25. no ascending or descending | 2 ascending or descending | 3 ascending or descending
-criteria.append([Criterion("no ascending or descending", lambda v: not (in_full_ascend(v) or in_full_descend(v))),
-                 Criterion("2 ascending or descending",
-                           lambda v: in_part_ascend(v) or in_part_descend(v)),
-                 Criterion("3 ascending or descending", lambda v: in_full_ascend(v) or in_full_descend(v))])
+
+
+def in_full_ascend_seq(v: InputType):
+    return gBLUE(v) + 1 == gYELLOW(v) and gYELLOW(v) + 1 == gPURPLE(v)
+
+
+def in_part_ascend_seq(v: InputType):
+    return not in_full_ascend_seq(v) and (gBLUE(v) + 1 == gYELLOW(v) or gYELLOW(v) + 1 == gPURPLE(v))
+
+
+def in_full_descend_seq(v: InputType):
+    return gBLUE(v) - 1 == gYELLOW(v) and gYELLOW(v) - 1 == gPURPLE(v)
+
+
+def in_part_descend_seq(v: InputType):
+    return not in_full_descend_seq(v) and (gBLUE(v) - 1 == gYELLOW(v) or gYELLOW(v) - 1 == gPURPLE(v))
+
+
+# 24. 3 ascending seq | 2 ascending seq | no ascending seq
+criteria.append([Criterion("3 ascending seq", lambda v: in_full_ascend_seq(v)),
+                 Criterion("2 ascending seq",
+                           lambda v: in_part_ascend_seq(v)),
+                 Criterion("no ascending seq", lambda v: not (in_full_ascend_seq(v) or in_part_ascend_seq(v)))])
+# 25. no ascending or descending seq | 2 ascending or descending seq | 3 ascending or descending seq
+criteria.append([Criterion("no ascending or descending seq", lambda v: not (in_full_ascend_seq(v) or in_part_ascend_seq(v) or in_full_descend_seq(v) or in_part_descend_seq(v))),
+                 Criterion("2 ascending or descending seq",
+                           lambda v: in_part_ascend_seq(v) or in_part_descend_seq(v)),
+                 Criterion("3 ascending or descending seq", lambda v: in_full_ascend_seq(v) or in_full_descend_seq(v))])
 
 
 def single_test_func_list(test: typing.Callable[[int], bool], names: typing.List[str]):
@@ -246,15 +265,15 @@ criteria.append([Criterion("blue is even", lambda v: is_even(gBLUE(v))),
                            lambda v: is_even(gPURPLE(v))),
                  Criterion("purple is odd", lambda v: not is_even(gPURPLE(v)))])
 # 34. blue is one of smallest | yellow is one of smallest | purple is one of smallest
-criteria.append([Criterion("blue is one of smallest", lambda v: is_smallest(Color.BLUE, v)),
+criteria.append([Criterion("blue is one of smallest", lambda v: is_one_of_smallest(Color.BLUE, v)),
                  Criterion("yellow is one of smallest",
-                           lambda v: is_smallest(Color.YELLOW, v)),
-                 Criterion("purple is one of smallest", lambda v: is_smallest(Color.PURPLE, v))])
+                           lambda v: is_one_of_smallest(Color.YELLOW, v)),
+                 Criterion("purple is one of smallest", lambda v: is_one_of_smallest(Color.PURPLE, v))])
 # 35. blue is one of largest | yellow is one of largest | purple is one of largest
-criteria.append([Criterion("blue is one of largest", lambda v: is_largest(Color.BLUE, v)),
+criteria.append([Criterion("blue is one of largest", lambda v: is_one_of_largest(Color.BLUE, v)),
                  Criterion("yellow is one of largest",
-                           lambda v: is_largest(Color.YELLOW, v)),
-                 Criterion("purple is one of largest", lambda v: is_largest(Color.PURPLE, v))])
+                           lambda v: is_one_of_largest(Color.YELLOW, v)),
+                 Criterion("purple is one of largest", lambda v: is_one_of_largest(Color.PURPLE, v))])
 # 36. sum is multiple of 3 | sum is multiple of 4 | sum is multiple of 5
 criteria.append([Criterion("sum is multiple of 3", lambda v: sum(v) % 3 == 0),
                  Criterion("sum is multiple of 4", lambda v: sum(v) % 4 == 0),
